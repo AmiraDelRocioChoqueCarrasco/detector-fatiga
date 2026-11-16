@@ -38,7 +38,7 @@ tests/      pruebas (todavía no las subo)
 
 - [x] Estructura del repositorio
 - [x] Métricas EAR/MAR y PERCLOS
-- [ ] Partición por sujeto
+- [x] Partición por sujeto
 - [ ] CNN de ojos
 - [ ] Extracción de características de videos
 - [ ] Modelo temporal
@@ -64,6 +64,22 @@ es que dependan solo de numpy para poder revisarlas rápido:
   como una fracción del EAR mediano de la persona con los ojos abiertos.
 
 Todo lo que son rutas e hiperparámetros está en `src/config.py`.
+
+## Datos y partición
+
+Para los ojos voy a usar el dataset **MRL Eye**. Hay que descargarlo aparte y
+descomprimirlo en `data/raw/mrl_eye/`. Los archivos vienen con nombres como
+`s0001_00001_0_0_0_0_0_01.png`, así que de ahí saco el sujeto, si usa gafas y
+si el ojo está cerrado o abierto.
+
+Con `python src/prepare_mrl.py` genero `data/processed/mrl_manifest.csv`, que
+tiene la ruta de cada imagen, el sujeto, la etiqueta y el split. El CSV queda
+ignorado por Git porque es un archivo generado.
+
+La partición es 70/15/15 (train/val/test) y la hago **por sujeto** en
+`src/splits.py`, no por imagen. Si parto las imágenes al azar, la misma persona
+puede aparecer en train y en test y las métricas ya no reflejan nada real.
+Para que sea reproducible uso la semilla 42.
 
 ## Requisitos
 
