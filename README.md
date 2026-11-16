@@ -37,7 +37,7 @@ tests/      pruebas (todavía no las subo)
 ## Estado
 
 - [x] Estructura del repositorio
-- [ ] Métricas EAR/MAR y PERCLOS
+- [x] Métricas EAR/MAR y PERCLOS
 - [ ] Partición por sujeto
 - [ ] CNN de ojos
 - [ ] Extracción de características de videos
@@ -46,6 +46,24 @@ tests/      pruebas (todavía no las subo)
 - [ ] Pruebas
 
 Voy a ir subiendo el avance por partes, no todo de golpe.
+
+## Cómo calculo las métricas
+
+En `src/features.py` están las funciones que uso en todo el proyecto. La idea
+es que dependan solo de numpy para poder revisarlas rápido:
+
+- **EAR**: tomo seis puntos de cada ojo (los índices del Face Mesh de
+  MediaPipe) y divido la suma de las distancias verticales entre dos veces la
+  distancia horizontal. Si el ojo está abierto el valor sube; si se cierra,
+  baja.
+- **MAR**: hago algo parecido con la boca, con tres aperturas verticales y el
+  ancho entre las comisuras. Sirve para ver bostezos.
+- **PERCLOS**: guardo muestras de tiempo con el estado del ojo y calculo qué
+  porcentaje del tiempo estuvo cerrado en la ventana (por defecto 60 s).
+- **Calibración**: en vez de usar un umbral fijo para todos, saco el umbral
+  como una fracción del EAR mediano de la persona con los ojos abiertos.
+
+Todo lo que son rutas e hiperparámetros está en `src/config.py`.
 
 ## Requisitos
 
