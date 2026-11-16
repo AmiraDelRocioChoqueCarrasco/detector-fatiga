@@ -1,15 +1,15 @@
 # Detector de fatiga y somnolencia
 
-Proyecto del curso de Inteligencia Artificial (Sexto Semestre).
+Proyecto del curso de Inteligencia Artificial.
 
 La idea es armar un prototipo que detecte señales de fatiga usando la webcam:
 ojos cerrados, microsueños, bostezos y cosas así.
 
-**Autora:** Amira Del Rocío Choque Carrasco
+**Autor:** Amira Del Rocío Choque Carrasco, Luis Andre Angulo, Andres Torrez Ulloa, Ernesto Rimassa
 
 ## De qué se trata
 
-Quiero medir algunas señales que se pueden sacar de la cara sin mucho lío:
+Quiero medir algunas señales que se pueden sacar de la cara:
 
 - **EAR** (Eye Aspect Ratio): qué tanto se abre o se cierra el ojo.
 - **MAR** (Mouth Aspect Ratio): qué tanto se abre la boca, para los bostezos.
