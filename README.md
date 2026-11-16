@@ -39,7 +39,7 @@ tests/      pruebas (todavía no las subo)
 - [x] Estructura del repositorio
 - [x] Métricas EAR/MAR y PERCLOS
 - [x] Partición por sujeto
-- [ ] CNN de ojos
+- [x] CNN de ojos
 - [ ] Extracción de características de videos
 - [ ] Modelo temporal
 - [ ] Demo en tiempo real
@@ -80,6 +80,35 @@ La partición es 70/15/15 (train/val/test) y la hago **por sujeto** en
 `src/splits.py`, no por imagen. Si parto las imágenes al azar, la misma persona
 puede aparecer en train y en test y las métricas ya no reflejan nada real.
 Para que sea reproducible uso la semilla 42.
+
+## Entrenar la CNN de ojos
+
+Primero tiene que existir el manifiesto de MRL. Después:
+
+```bash
+python src/train_cnn.py
+```
+
+Uso MobileNetV2 con transfer learning en dos fases:
+
+1. Congelo el backbone y entreno solo la capa final (más rápido y evito
+   romper los pesos preentrenados).
+2. Descongelo las últimas 30 capas y hago un ajuste fino con learning rate
+   mucho más bajo. Las capas de BatchNorm las mantengo congeladas.
+
+Como en MRL hay más ojos abiertos que cerrados, uso `class_weight` para que el
+modelo no se vaya hacia la clase mayoritaria. La evaluación final es sobre los
+sujetos de test, que no se usaron en ninguna fase del entrenamiento.
+
+Archivos que genera:
+
+- `models/eye_cnn.keras`: el modelo.
+- `models/eye_cnn.tflite`: solo si corro con `--export-tflite` (cuantización
+  dinámica, para probar en algo más liviano).
+
+La primera ejecución puede descargar los pesos de ImageNet. El umbral que uso
+para reportar es 0.5 y las métricas dependen del dataset, así que no
+significan que funcione igual en una webcam real.
 
 ## Requisitos
 
