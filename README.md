@@ -40,7 +40,7 @@ tests/      pruebas (todavía no las subo)
 - [x] Métricas EAR/MAR y PERCLOS
 - [x] Partición por sujeto
 - [x] CNN de ojos
-- [ ] Extracción de características de videos
+- [x] Extracción de características de videos
 - [ ] Modelo temporal
 - [ ] Demo en tiempo real
 - [ ] Pruebas
@@ -109,6 +109,36 @@ Archivos que genera:
 La primera ejecución puede descargar los pesos de ImageNet. El umbral que uso
 para reportar es 0.5 y las métricas dependen del dataset, así que no
 significan que funcione igual en una webcam real.
+
+## Videos y características
+
+Para la parte temporal pensé en videos tipo YawDD, UTA-RLDD o NTHU, pero no
+los incluyo en el repo. Los videos van en `data/raw/videos/`.
+
+El problema es que cada dataset ordena y nombra los videos a su manera, así
+que las funciones `infer_subject()` e `infer_label()` de
+`src/extract_video_features.py` son solo un ejemplo. Hay que revisar la
+estructura real antes de correrlo:
+
+- `infer_subject()` tiene que devolver el mismo identificador para todos los
+  videos de una misma persona (no uno por video).
+- `infer_label()` tiene que devolver 0 para alerta y 1 para fatiga. La
+  heurística que dejé busca "drowsy" o "yawn" en el nombre, pero eso no es una
+  anotación confiable.
+
+Después:
+
+```bash
+python src/extract_video_features.py
+```
+
+Se genera `data/processed/video_features.csv` con una fila por fotograma donde
+MediaPipe detectó un rostro. Este CSV tampoco se sube (es generado y puede
+tener datos de personas). Si un video no tiene detecciones, puede quedar con
+muy pocas filas o vacío, así que conviene revisarlo antes de entrenar.
+
+Uso `mediapipe<1.0` porque en la versión 1.x ya no está `mp.solutions`, que es
+lo que necesito para Face Mesh.
 
 ## Requisitos
 
