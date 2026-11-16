@@ -30,7 +30,15 @@ decidir si alguien puede conducir. No hay que probar la demo manejando.
 ```text
 data/       datos locales (no se suben al repo)
 models/     modelos entrenados (no se suben al repo)
-src/        código del proyecto
+src/
+  config.py                 rutas y parámetros
+  features.py               EAR, MAR, PERCLOS y calibración
+  splits.py                 partición por sujeto
+  prepare_mrl.py            manifiesto de MRL Eye
+  train_cnn.py              entrenamiento de la CNN de ojos
+  extract_video_features.py EAR/MAR a partir de videos
+  train_temporal.py         entrenamiento de la GRU
+  realtime_demo.py          demo con webcam
 tests/      pruebas (todavía no las subo)
 ```
 
@@ -42,10 +50,10 @@ tests/      pruebas (todavía no las subo)
 - [x] CNN de ojos
 - [x] Extracción de características de videos
 - [x] Modelo temporal
-- [ ] Demo en tiempo real
+- [x] Demo en tiempo real
 - [ ] Pruebas
 
-Voy a ir subiendo el avance por partes, no todo de golpe.
+La parte de pruebas la dejo para el final, por eso todavía no está en el repo.
 
 ## Cómo calculo las métricas
 
@@ -161,6 +169,77 @@ El modelo se guarda en `models/temporal_gru.keras`. Ojo: la demo de la webcam
 no usa este modelo, usa EAR/MAR/PERCLOS y opcionalmente la CNN de ojos. La GRU
 quedó como experimento con los videos.
 
-## Requisitos
+## Demo en tiempo real
 
-Python 3.10, 3.11 o 3.12.
+Esta es la parte que más me interesaba. Funciona con la webcam, OpenCV y
+MediaPipe.
+
+Solo con geometría (no necesita modelos entrenados):
+
+```bash
+python src/realtime_demo.py
+```
+
+Con la CNN entrenada:
+
+```bash
+python src/realtime_demo.py --cnn models/eye_cnn.keras
+```
+
+Si la cámara por defecto no es la 0, se puede cambiar con `--camera 1`.
+
+Al inicio hace una calibración de 10 segundos: hay que mirar a la cámara con
+los ojos abiertos y en condiciones normales. Con eso saca el umbral de EAR de
+la persona. `r` vuelve a calibrar y `q` sale.
+
+En pantalla se ven el EAR, el umbral, el MAR y el PERCLOS. Las alertas son:
+
+- **MICROSUENO**: los ojos quedan debajo del umbral por más de 1 segundo
+  seguido.
+- **FATIGA**: el PERCLOS pasa del 15 %.
+- **BOSTEZO**: el MAR pasa de 0.60 durante 1.5 segundos.
+- Si uso `--cnn`, para marcar el ojo como cerrado pido que coincidan el EAR y
+  la CNN (probabilidad mayor a 0.5), así no salta tan fácil por un parpadeo.
+
+## Requisitos e instalación
+
+- Python 3.10, 3.11 o 3.12.
+- Webcam para la demo.
+- Los datasets no vienen incluidos.
+
+En Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+En Linux o macOS:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Si PowerShell no deja activar el entorno, se puede usar directamente
+`.\.venv\Scripts\python.exe -m pip install -r requirements.txt`.
+
+TensorFlow puede necesitar una instalación aparte si se quiere usar GPU. En
+Windows lo normal es que corra en CPU.
+
+## Limitaciones y pendientes
+
+- Los umbrales de EAR, MAR y PERCLOS son valores iniciales. No están
+  calibrados para todas las personas, cámaras ni condiciones de luz; hay que
+  ajustarlos con datos reales.
+- En los videos, la etiqueta y el sujeto dependen de cómo esté ordenado el
+  dataset. Si eso está mal, las métricas no sirven.
+- La extracción temporal depende de que MediaPipe detecte el rostro y del FPS
+  configurado. Conviene revisar el CSV antes de entrenar.
+- Todavía falta la parte de pruebas unitarias.
+- No hay validación clínica ni automotriz. Es un prototipo académico.
+
