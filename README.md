@@ -41,7 +41,7 @@ tests/      pruebas (todavía no las subo)
 - [x] Partición por sujeto
 - [x] CNN de ojos
 - [x] Extracción de características de videos
-- [ ] Modelo temporal
+- [x] Modelo temporal
 - [ ] Demo en tiempo real
 - [ ] Pruebas
 
@@ -139,6 +139,27 @@ muy pocas filas o vacío, así que conviene revisarlo antes de entrenar.
 
 Uso `mediapipe<1.0` porque en la versión 1.x ya no está `mp.solutions`, que es
 lo que necesito para Face Mesh.
+
+## Modelo temporal
+
+Con el CSV de características:
+
+```bash
+python src/train_temporal.py
+```
+
+Antes de armar las ventanas normalizo el EAR de cada video dividiéndolo por su
+mediana, y agrego `ear_delta` (la diferencia entre fotogramas). La idea es que
+el modelo no dependa del tamaño de ojo de cada persona.
+
+Las ventanas son de 3 segundos con avance de 1 segundo, suponiendo 30 FPS
+(todo eso se cambia en `src/config.py`). La etiqueta de cada ventana es la
+mayoría de los fotogramas. Entreno una GRU chica (32 unidades) y vuelvo a
+partir por sujeto, esta vez a nivel de ventana.
+
+El modelo se guarda en `models/temporal_gru.keras`. Ojo: la demo de la webcam
+no usa este modelo, usa EAR/MAR/PERCLOS y opcionalmente la CNN de ojos. La GRU
+quedó como experimento con los videos.
 
 ## Requisitos
 
